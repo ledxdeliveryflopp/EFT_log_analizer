@@ -1,3 +1,5 @@
+from loguru import logger
+
 from src.settings.constants import Translation
 from src.settings.settings import AppSettings
 
@@ -9,6 +11,8 @@ def translate_country(eng_country: str) -> str | None:
         if translated_country:
             return translated_country
         else:
+            with open("translation.txt", "a") as file:
+                file.write(f"\n| INFO | eng country - {eng_country}")
             return None
     else:
         return None
