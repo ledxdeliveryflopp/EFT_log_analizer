@@ -1,5 +1,3 @@
-from loguru import logger
-
 from src.settings.constants import Translation
 from src.settings.settings import AppSettings
 

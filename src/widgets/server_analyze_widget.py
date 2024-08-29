@@ -70,8 +70,6 @@ class ServerAnalyzeWidget(QtWidgets.QWidget):
         data = response.json()
         country = data.get("country")
         city = data.get("city")
-        if self.help_text_status is False:
-            self.destroy_help_text()
         translated_country_name = translate_country(eng_country=country)
         self.layout.addWidget(self.result_text)
         if not translated_country_name:
