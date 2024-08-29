@@ -4,7 +4,7 @@ from PySide6 import QtWidgets, QtCore
 from PySide6.QtWidgets import QFileDialog
 from loguru import logger
 
-from src.utils import translate_country
+from src.settings.utils import translate_country
 
 
 class ServerAnalyzeWidget(QtWidgets.QWidget):
@@ -17,11 +17,11 @@ class ServerAnalyzeWidget(QtWidgets.QWidget):
         self.layout = QtWidgets.QVBoxLayout(self)
 
         self.result_text = QtWidgets.QLabel(alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.help_text = QtWidgets.QLabel("название лога: network-connection",
+        self.help_text = QtWidgets.QLabel("log name: network-connection",
                                           alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
-        self.search_log_button = QtWidgets.QPushButton("Найти log файл")
-        self.last_log_button = QtWidgets.QPushButton("Получить информацию с последнего лога")
+        self.search_log_button = QtWidgets.QPushButton("Find log file")
+        self.last_log_button = QtWidgets.QPushButton("Get server from last log file")
 
         self.last_log_button.clicked.connect(self.get_last_log)
         self.search_log_button.clicked.connect(self.get_server_info)
@@ -76,13 +76,14 @@ class ServerAnalyzeWidget(QtWidgets.QWidget):
         self.layout.addWidget(self.result_text)
         if not translated_country_name:
             self.result_text.setText(
-                f"Город - {city}, Страна - {country}, IP сервера - {server_address}")
+                f"City - {city}, Country - {country}, server IP - {server_address}")
         if translated_country_name:
             self.result_text.setText(
                 f"Город - {city}, Страна - {translated_country_name}, IP сервера - {server_address}")
 
     @logger.catch
     def get_last_log(self):
+        """Получение информации с последнего лога"""
         with open(file=self.last_log, mode="r") as file:
             content = file.read()
         content_split = content.split("\n")
@@ -108,7 +109,7 @@ class ServerAnalyzeWidget(QtWidgets.QWidget):
         self.layout.addWidget(self.result_text)
         if not translated_country_name:
             self.result_text.setText(
-                f"Город - {city}, Страна - {country}, IP сервера - {server_address}")
+                f"City - {city}, Country - {country}, server IP - {server_address}")
         if translated_country_name:
             self.result_text.setText(f"Город - {city}, Страна - {translated_country_name}, IP сервера - {server_address}")
 
