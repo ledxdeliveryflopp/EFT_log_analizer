@@ -4,6 +4,8 @@ from PySide6 import QtWidgets, QtCore
 from PySide6.QtWidgets import QFileDialog
 from loguru import logger
 
+from src.utils import translate_country
+
 
 class ServerAnalyzeWidget(QtWidgets.QWidget):
 
@@ -59,6 +61,8 @@ class ServerAnalyzeWidget(QtWidgets.QWidget):
         if not server_address and self.help_text_status is False:
             self.help_text.setText("Не выбран файл")
             return None
+        if self.help_text_status is False:
+            self.destroy_help_text()
         if not server_address and self.help_text_status is True:
             self.result_text.setText("Не выбран файл")
             return None
@@ -68,8 +72,14 @@ class ServerAnalyzeWidget(QtWidgets.QWidget):
         city = data.get("city")
         if self.help_text_status is False:
             self.destroy_help_text()
+        translated_country_name = translate_country(eng_country=country)
         self.layout.addWidget(self.result_text)
-        self.result_text.setText(f"Город - {city}, Страна - {country}, IP сервера - {server_address}")
+        if not translated_country_name:
+            self.result_text.setText(
+                f"Город - {city}, Страна - {country}, IP сервера - {server_address}")
+        if translated_country_name:
+            self.result_text.setText(
+                f"Город - {city}, Страна - {translated_country_name}, IP сервера - {server_address}")
 
     @logger.catch
     def get_last_log(self):
@@ -94,8 +104,13 @@ class ServerAnalyzeWidget(QtWidgets.QWidget):
         city = data.get("city")
         if self.help_text_status is False:
             self.destroy_help_text()
+        translated_country_name = translate_country(eng_country=country)
         self.layout.addWidget(self.result_text)
-        self.result_text.setText(f"Город - {city}, Страна - {country}, IP сервера - {server_address}")
+        if not translated_country_name:
+            self.result_text.setText(
+                f"Город - {city}, Страна - {country}, IP сервера - {server_address}")
+        if translated_country_name:
+            self.result_text.setText(f"Город - {city}, Страна - {translated_country_name}, IP сервера - {server_address}")
 
     @logger.catch
     def destroy_help_text(self):
