@@ -1,6 +1,6 @@
 from PySide6 import QtWidgets
 
-from src.widgets.log_search_widget import ServerAnalyzeWidget
+from src.widgets.server_analyze_widget import ServerAnalyzeWidget
 
 
 class MainWindow(QtWidgets.QMainWindow):
