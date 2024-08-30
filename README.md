@@ -1,2 +1,2 @@
-# EFT_log_analizer
+# eft_server_analizer
  
