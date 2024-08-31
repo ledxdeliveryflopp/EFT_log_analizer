@@ -1,9 +1,10 @@
+import subprocess
 import requests
 
 from PySide6 import QtWidgets, QtCore
+from PySide6.QtCore import QThreadPool
 from PySide6.QtWidgets import QFileDialog
 from loguru import logger
-
 from src.settings.utils import translate_country
 
 
@@ -13,10 +14,10 @@ class ServerAnalyzeWidget(QtWidgets.QWidget):
         super().__init__()
         self.help_text_status = False
         self.last_log = None
-
         self.layout = QtWidgets.QVBoxLayout(self)
 
         self.result_text = QtWidgets.QLabel(alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.ping_result = QtWidgets.QLabel(alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
         self.help_text = QtWidgets.QLabel("log name: network-connection",
                                           alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
@@ -51,13 +52,26 @@ class ServerAnalyzeWidget(QtWidgets.QWidget):
         server_address = server_address[0]
         server_address = server_address.split(":")
         server_address = server_address[0]
-        logger.info(f"Slice result - {server_address}")
+        logger.info(f"server ip - {server_address}")
         return server_address
+
+    @logger.catch
+    def ping_server(self, server: str):
+        command = subprocess.run(["ping", f"{server}"], stdout=subprocess.PIPE, text=True,
+                                 encoding="cp866")
+        logger.info(f"ping status code - {command.returncode}")
+        command_result_split = command.stdout.split("\n")
+        command_result_slice = command_result_split[8:]
+        command_result = command_result_slice[0]
+        logger.info(f"ping result - {command_result}")
+        self.layout.addWidget(self.ping_result)
+        self.ping_result.setText(f"{command_result}")
 
     @logger.catch
     def get_server_info(self):
         """Получение информации о сервере"""
         server_address = self.get_server_from_log_file()
+        self.ping_server(server=server_address)
         if not server_address and self.help_text_status is False:
             self.help_text.setText("Не выбран файл")
             return None

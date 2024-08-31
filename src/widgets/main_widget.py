@@ -1,4 +1,4 @@
-from PySide6 import QtWidgets, QtCore
+from PySide6 import QtWidgets
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QToolBar
 from loguru import logger
@@ -30,8 +30,7 @@ class MainWindow(QtWidgets.QMainWindow):
             logger.info(f"translation on, button: {self.translation.isChecked()},"
                         f" settings: {AppSettings.translations}")
             self.translation.setText("Перевод на английский")
-            self.analyze_widget.deleteLater()
-            self.analyze_widget = ServerAnalyzeWidget()
+
             self.analyze_widget.help_text.setText("Название лога: network-connection")
             self.analyze_widget.search_log_button.setText("Найти лог файл")
             self.analyze_widget.last_log_button.setText("Информация с последнего лога")
@@ -41,6 +40,7 @@ class MainWindow(QtWidgets.QMainWindow):
             logger.info(f"translation off, button: {self.translation.isChecked()},"
                         f" settings: {AppSettings.translations}")
             self.translation.setText("Translation into russian")
-            self.analyze_widget.deleteLater()
-            self.analyze_widget = ServerAnalyzeWidget()
+            self.analyze_widget.help_text.setText("log name: network-connection")
+            self.analyze_widget.search_log_button.setText("Find log file")
+            self.analyze_widget.last_log_button.setText("Get server from last log file")
             self.setCentralWidget(self.analyze_widget)
