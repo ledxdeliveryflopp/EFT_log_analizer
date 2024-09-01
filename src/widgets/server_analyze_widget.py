@@ -7,18 +7,16 @@ from PySide6.QtCore import QThreadPool
 from PySide6.QtWidgets import QFileDialog
 from loguru import logger
 
-from src.settings.settings import get_translated_dict
+from src.settings.settings import get_translated_func
+from src.settings.thread_manager import ThreadManager
 from src.settings.utils import translate_country
 
 
-class ServerAnalyzeWidget(QtWidgets.QWidget):
+class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
 
     def __init__(self):
         super().__init__()
-        self.thread_manager = QThreadPool()
-        logger.info(f"thread count - {self.thread_manager.maxThreadCount()}")
-        self.lang = get_translated_dict()
-        logger.info(f"lang- {self.lang}")
+        self.lang = get_translated_func()
 
         self.help_text_status = False
         self.ping_result_status = False
@@ -41,28 +39,42 @@ class ServerAnalyzeWidget(QtWidgets.QWidget):
         self.layout.addWidget(self.last_log_button, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
     @logger.catch
+    def check_active_thread_block_button(self):
+        """Блокировка кнопок поиска и последнего лога при активных потоках"""
+        active_thread = self.get_active_thread_count()
+        if active_thread > 0:
+            self.search_log_button.blockSignals(True)
+            return True
+        else:
+            return False
+
+    @logger.catch
     def get_server_from_log_file(self):
         """Поиск ip сервера в log файле"""
-        log_file = QFileDialog.getOpenFileName(self, self.lang.get("search_file"), filter="log(*.log)")[0]
-        if not log_file:
-            return None
-        with open(file=log_file, mode="r") as file:
-            content = file.read()
-        content_split = content.split("\n")
-        result_list = [string for string in content_split if
-                       "Enter to the 'Connected' state" in string]
-        result_list_len = len(result_list) - 1
-        last_connection_log = result_list[result_list_len]
-        self.last_log = log_file
-        server_address = last_connection_log.split(" ")
-        server_address = server_address[8:]
-        server_address = server_address[0]
-        server_address = server_address.split(",")
-        server_address = server_address[0]
-        server_address = server_address.split(":")
-        server_address = server_address[0]
-        logger.info(f"server ip - {server_address}")
-        return server_address
+        active = self.check_active_thread_block_button()
+        if active is False:
+            log_file = QFileDialog.getOpenFileName(self, self.lang.get("search_file"), filter="log(*.log)")[0]
+            if not log_file:
+                return None
+            with open(file=log_file, mode="r") as file:
+                content = file.read()
+            content_split = content.split("\n")
+            result_list = [string for string in content_split if
+                           "Enter to the 'Connected' state" in string]
+            result_list_len = len(result_list) - 1
+            last_connection_log = result_list[result_list_len]
+            self.last_log = log_file
+            server_address = last_connection_log.split(" ")
+            server_address = server_address[8:]
+            server_address = server_address[0]
+            server_address = server_address.split(",")
+            server_address = server_address[0]
+            server_address = server_address.split(":")
+            server_address = server_address[0]
+            logger.info(f"server ip - {server_address}")
+            return server_address
+        else:
+            return True
 
     @logger.catch
     def ping_server(self, server_ip):
@@ -75,34 +87,32 @@ class ServerAnalyzeWidget(QtWidgets.QWidget):
         command_result_slice = command_result_split[8:]
         command_result = command_result_slice[0]
         logger.info(f"ping result - {command_result}")
-        if self.ping_result_status is True:
-            self.ping_result.show()
         self.layout.addWidget(self.ping_result)
-        print(f"ping lang - {self.lang.get('ping_result')}")
         self.ping_result.setText(f"{self.lang.get('ping_result')}{command_result}")
         logger.info(f"{self.ping_server.__name__} - thread stop")
+        self.ping_result.show()
 
     @logger.catch
     def get_server_info(self):
         """Получение информации о сервере"""
+        self.destroy_ping_result()
         server_ip = self.get_server_from_log_file()
-        print(self.help_text_status)
         if not server_ip:
             self.help_text.setText(self.lang.get("file_dont_selected"))
             self.destroy_ping_result()
             self.destroy_result_text()
             return None
+        elif server_ip is True:
+            self.search_log_button.blockSignals(False)
+            return None
         if self.help_text_status is False:
             self.destroy_help_text()
         self.thread_manager.start(partial(self.ping_server, f"{server_ip}"))
-        logger.info(f"active thread count - {self.thread_manager.activeThreadCount()}")
         response = requests.get(url=f"https://ipinfo.io/{server_ip}/json")
         data = response.json()
         country = data.get("country")
         city = data.get("city")
         translated_country_name = translate_country(eng_country=country)
-        if self.result_text_status is True:
-            self.result_text.show()
         self.layout.addWidget(self.result_text)
         self.result_text.setText(f"{self.lang.get('city')} {city}, {self.lang.get('country')} {translated_country_name},"
                                  f" {self.lang.get('server_ip')} {server_ip}")
