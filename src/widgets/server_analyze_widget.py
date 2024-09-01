@@ -97,7 +97,7 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
         """Получение информации о сервере"""
         self.destroy_ping_result()
         server_ip = self.get_server_from_log_file()
-        if not server_ip:
+        if not server_ip and self.help_text_status is False:
             self.help_text.setText(self.lang.get("file_dont_selected"))
             self.destroy_ping_result()
             self.destroy_result_text()
@@ -114,6 +114,7 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
         city = data.get("city")
         translated_country_name = translate_country(eng_country=country)
         self.layout.addWidget(self.result_text)
+        self.result_text.show()
         self.result_text.setText(f"{self.lang.get('city')} {city}, {self.lang.get('country')} {translated_country_name},"
                                  f" {self.lang.get('server_ip')} {server_ip}")
 
