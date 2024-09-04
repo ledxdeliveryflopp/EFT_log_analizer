@@ -1,7 +1,7 @@
 class Translation:
     """Списки перевода"""
     COUNTRY: dict = {"DK": "Дания", "RU": "Россия", "GB": "Великобритания", "FI": "Финляндия",
-                     "SE": "Швеция", "IE": "Ирландия"}
+                     "SE": "Швеция", "IE": "Ирландия", "DE": "Германия", "CH": "Швейцария"}
 
     ENG_UI: dict = {"toolbar": "settings", "translation": "Translation into russian",
                     "search_log_file": "Find log file",
