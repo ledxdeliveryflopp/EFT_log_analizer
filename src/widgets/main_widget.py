@@ -1,6 +1,5 @@
 from PySide6 import QtWidgets
 from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QToolBar
 from loguru import logger
 
 from src.settings.settings import AppSettings, get_translated_dict
@@ -12,15 +11,15 @@ class MainWindow(QtWidgets.QMainWindow, ThreadManager):
 
     def __init__(self):
         super().__init__()
-
-        self.toolbar = QToolBar("settings", self)
-        self.addToolBar(self.toolbar)
-
         self.translation = QAction("Translation into russian", self)
-
         self.translation.triggered.connect(self.set_translation)
         self.translation.setCheckable(True)
-        self.toolbar.addAction(self.translation)
+
+        self.menu = self.menuBar()
+        self.settings_menu = self.menu.addMenu("Settings")
+        self.settings_menu.addAction(self.translation)
+        self.settings_menu.addSeparator()
+
         self.set_translation()
 
     def set_translation(self):
@@ -33,6 +32,7 @@ class MainWindow(QtWidgets.QMainWindow, ThreadManager):
                 new_lang = get_translated_dict()
                 logger.info(f"translation on, button: {self.translation.isChecked()},"
                             f" settings: {AppSettings.translations}")
+                self.settings_menu.setTitle(new_lang.get("settings"))
                 self.translation.setText(new_lang.get("translation"))
                 analyze_widget = ServerAnalyzeWidget()
                 analyze_widget.search_log_button.setText(new_lang.get("search_log_file"))
@@ -46,6 +46,7 @@ class MainWindow(QtWidgets.QMainWindow, ThreadManager):
                 new_lang = get_translated_dict()
                 logger.info(f"translation off, button: {self.translation.isChecked()},"
                             f" settings: {AppSettings.translations}")
+                self.settings_menu.setTitle(new_lang.get("settings"))
                 self.translation.setText(new_lang.get("translation"))
                 analyze_widget = ServerAnalyzeWidget()
                 analyze_widget.search_log_button.setText(new_lang.get("search_log_file"))
