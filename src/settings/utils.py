@@ -11,6 +11,6 @@ def translate_country(eng_country: str) -> str | None:
         else:
             with open("translation.txt", "a") as file:
                 file.write(f"\n| INFO | eng country - {eng_country}")
-            return None
+            return eng_country
     else:
-        return None
+        return eng_country

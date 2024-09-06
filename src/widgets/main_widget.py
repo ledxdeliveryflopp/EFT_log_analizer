@@ -3,18 +3,17 @@ from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QToolBar
 from loguru import logger
 
-from src.settings.settings import AppSettings
+from src.settings.settings import AppSettings, get_translated_dict
+from src.settings.thread_manager import ThreadManager
 from src.widgets.server_analyze_widget import ServerAnalyzeWidget
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow, ThreadManager):
 
     def __init__(self):
         super().__init__()
-        self.analyze_widget = ServerAnalyzeWidget()
-        self.setCentralWidget(self.analyze_widget)
 
-        self.toolbar = QToolBar("Settings", self)
+        self.toolbar = QToolBar("settings", self)
         self.addToolBar(self.toolbar)
 
         self.translation = QAction("Translation into russian", self)
@@ -22,27 +21,37 @@ class MainWindow(QtWidgets.QMainWindow):
         self.translation.triggered.connect(self.set_translation)
         self.translation.setCheckable(True)
         self.toolbar.addAction(self.translation)
+        self.set_translation()
 
     def set_translation(self):
         """Перевод приложения на русский или английский"""
-        if self.translation.isChecked() is True:
-            AppSettings.translations = True
-            logger.info(f"translation on, button: {self.translation.isChecked()},"
-                        f" settings: {AppSettings.translations}")
-            self.translation.setText("Перевод на английский")
-
-            self.analyze_widget.help_text.setText("Название лога: network-connection")
-            self.analyze_widget.last_log_button.setText("Информация с последнего лога")
-            if self.analyze_widget.help_text_status is False:
-                self.analyze_widget.search_log_button.setText("Найти лог файл")
-            self.setCentralWidget(self.analyze_widget)
-        if self.translation.isChecked() is False:
-            AppSettings.translations = False
-            logger.info(f"translation off, button: {self.translation.isChecked()},"
-                        f" settings: {AppSettings.translations}")
-            self.translation.setText("Translation into russian")
-            self.analyze_widget.search_log_button.setText("Find log file")
-            self.analyze_widget.last_log_button.setText("Get server from last log file")
-            if self.analyze_widget.help_text_status is False:
-                self.analyze_widget.help_text.setText("log name: network-connection")
-            self.setCentralWidget(self.analyze_widget)
+        active_thread = self.get_active_thread_count()
+        if active_thread == 0:
+            if self.translation.isChecked() is True:
+                """Русский язык"""
+                AppSettings.translations = True
+                new_lang = get_translated_dict()
+                logger.info(f"translation on, button: {self.translation.isChecked()},"
+                            f" settings: {AppSettings.translations}")
+                self.translation.setText(new_lang.get("translation"))
+                analyze_widget = ServerAnalyzeWidget()
+                analyze_widget.search_log_button.setText(new_lang.get("search_log_file"))
+                analyze_widget.last_log_button.setText(new_lang.get("last_server"))
+                if analyze_widget.help_text_status is False:
+                    analyze_widget.help_text.setText(new_lang.get("help_text"))
+                self.setCentralWidget(analyze_widget)
+            if self.translation.isChecked() is False:
+                """Английский язык"""
+                AppSettings.translations = False
+                new_lang = get_translated_dict()
+                logger.info(f"translation off, button: {self.translation.isChecked()},"
+                            f" settings: {AppSettings.translations}")
+                self.translation.setText(new_lang.get("translation"))
+                analyze_widget = ServerAnalyzeWidget()
+                analyze_widget.search_log_button.setText(new_lang.get("search_log_file"))
+                analyze_widget.last_log_button.setText(new_lang.get("last_server"))
+                if analyze_widget.help_text_status is False:
+                    analyze_widget.help_text.setText(new_lang.get("help_text"))
+                self.setCentralWidget(analyze_widget)
+        else:
+            self.translation.setChecked(False)
