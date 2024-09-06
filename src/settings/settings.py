@@ -18,13 +18,13 @@ class AppSettings:
             return Translation.RU_FUNC
 
 
-def get_translated_dict():
+def get_translated_dict() -> dict:
     settings = AppSettings()
     ui_dict = settings.get_ui_translation()
     return ui_dict
 
 
-def get_translated_func():
+def get_translated_func() -> dict:
     settings = AppSettings()
     func_dict = settings.get_func_translation()
     return func_dict

@@ -2,7 +2,7 @@ from src.settings.constants import Translation
 from src.settings.settings import AppSettings
 
 
-def translate_country(eng_country: str) -> str | None:
+def translate_country(eng_country: str) -> str:
     """Перевод названия страны"""
     if AppSettings.translations is True:
         translated_country = Translation.COUNTRY.get(eng_country)

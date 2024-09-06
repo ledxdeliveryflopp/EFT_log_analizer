@@ -3,7 +3,6 @@ from functools import partial
 import requests
 
 from PySide6 import QtWidgets, QtCore
-from PySide6.QtCore import QThreadPool
 from PySide6.QtWidgets import QFileDialog
 from loguru import logger
 
@@ -14,7 +13,7 @@ from src.settings.utils import translate_country
 
 class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.lang = get_translated_func()
 
@@ -39,7 +38,7 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
         self.layout.addWidget(self.last_log_button, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
     @logger.catch
-    def check_active_thread_block_button(self):
+    def check_active_thread_block_button(self) -> bool:
         """Блокировка кнопок поиска и последнего лога при активных потоках"""
         active_thread = self.get_active_thread_count()
         if active_thread > 0:
@@ -49,7 +48,7 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
             return False
 
     @logger.catch
-    def get_server_from_log_file(self):
+    def get_server_from_log_file(self) -> None | str | bool:
         """Поиск ip сервера в log файле"""
         active = self.check_active_thread_block_button()
         if active is False:
@@ -77,7 +76,7 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
             return True
 
     @logger.catch
-    def ping_server(self, server_ip):
+    def ping_server(self, server_ip) -> None:
         """Пинг сервера"""
         logger.info(f"{self.ping_server.__name__} - thread start")
         command = subprocess.run(["ping", f"{server_ip}"], stdout=subprocess.PIPE, text=True,
@@ -93,7 +92,7 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
         self.ping_result.show()
 
     @logger.catch
-    def get_server_info(self):
+    def get_server_info(self) -> None:
         """Получение информации о сервере"""
         self.destroy_ping_result()
         server_ip = self.get_server_from_log_file()
@@ -119,7 +118,7 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
                                  f" {self.lang.get('server_ip')} {server_ip}")
 
     @logger.catch
-    def get_last_log(self):
+    def get_last_log(self) -> None:
         self.destroy_ping_result()
         self.destroy_result_text()
         """Получение информации с последнего лога"""
@@ -154,18 +153,18 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
             f" {self.lang.get('server_ip')} {server_address}")
 
     @logger.catch
-    def destroy_help_text(self):
+    def destroy_help_text(self) -> None:
         """Удаление информационного текста"""
         self.help_text.hide()
         self.help_text_status = True
 
     @logger.catch
-    def destroy_ping_result(self):
+    def destroy_ping_result(self) -> None:
         """Удаление информационного текста"""
         self.ping_result.hide()
         self.ping_result_status = True
 
     @logger.catch()
-    def destroy_result_text(self):
+    def destroy_result_text(self) -> None:
         self.result_text.hide()
         self.result_text_status = True

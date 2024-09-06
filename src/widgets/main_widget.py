@@ -9,7 +9,7 @@ from src.widgets.server_analyze_widget import ServerAnalyzeWidget
 
 class MainWindow(QtWidgets.QMainWindow, ThreadManager):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.translation = QAction("Translation into russian", self)
         self.translation.triggered.connect(self.set_translation)
@@ -22,7 +22,7 @@ class MainWindow(QtWidgets.QMainWindow, ThreadManager):
 
         self.set_translation()
 
-    def set_translation(self):
+    def set_translation(self) -> None:
         """Перевод приложения на русский или английский"""
         active_thread = self.get_active_thread_count()
         if active_thread == 0:
