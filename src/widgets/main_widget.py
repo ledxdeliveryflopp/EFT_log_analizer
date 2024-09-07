@@ -15,13 +15,19 @@ class MainWindow(QtWidgets.QMainWindow, ThreadManager):
         self.translation.triggered.connect(self.set_translation)
         self.translation.setCheckable(True)
 
+        self.server_ping = QAction("Ping server", self)
+        self.server_ping.triggered.connect(self.set_server_ping)
+        self.server_ping.setCheckable(True)
+
         self.menu = self.menuBar()
         self.settings_menu = self.menu.addMenu("Settings")
         self.settings_menu.addAction(self.translation)
         self.settings_menu.addSeparator()
+        self.settings_menu.addAction(self.server_ping)
 
         self.set_translation()
 
+    @logger.catch
     def set_translation(self) -> None:
         """Перевод приложения на русский или английский"""
         active_thread = self.get_active_thread_count()
@@ -34,6 +40,7 @@ class MainWindow(QtWidgets.QMainWindow, ThreadManager):
                             f" settings: {AppSettings.translations}")
                 self.settings_menu.setTitle(new_lang.get("settings"))
                 self.translation.setText(new_lang.get("translation"))
+                self.server_ping.setText(new_lang.get("server_ping"))
                 analyze_widget = ServerAnalyzeWidget()
                 analyze_widget.search_log_button.setText(new_lang.get("search_log_file"))
                 analyze_widget.last_log_button.setText(new_lang.get("last_server"))
@@ -48,6 +55,7 @@ class MainWindow(QtWidgets.QMainWindow, ThreadManager):
                             f" settings: {AppSettings.translations}")
                 self.settings_menu.setTitle(new_lang.get("settings"))
                 self.translation.setText(new_lang.get("translation"))
+                self.server_ping.setText(new_lang.get("server_ping"))
                 analyze_widget = ServerAnalyzeWidget()
                 analyze_widget.search_log_button.setText(new_lang.get("search_log_file"))
                 analyze_widget.last_log_button.setText(new_lang.get("last_server"))
@@ -56,3 +64,15 @@ class MainWindow(QtWidgets.QMainWindow, ThreadManager):
                 self.setCentralWidget(analyze_widget)
         else:
             self.translation.setChecked(False)
+
+    @logger.catch
+    def set_server_ping(self) -> None:
+        """Активация и диактивация пинга сервера"""
+        active_thread = self.get_active_thread_count()
+        if active_thread == 0:
+            if self.server_ping.isChecked() is True:
+                AppSettings.server_ping = True
+            elif self.server_ping.isChecked() is False:
+                AppSettings.server_ping = False
+        else:
+            self.server_ping.setChecked(False)

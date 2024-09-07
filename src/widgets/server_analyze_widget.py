@@ -6,7 +6,7 @@ from PySide6 import QtWidgets, QtCore
 from PySide6.QtWidgets import QFileDialog
 from loguru import logger
 
-from src.settings.settings import get_translated_func
+from src.settings.settings import get_translated_func, AppSettings
 from src.settings.thread_manager import ThreadManager
 from src.settings.utils import translate_country
 
@@ -106,7 +106,8 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
             return None
         if self.help_text_status is False:
             self.destroy_help_text()
-        self.thread_manager.start(partial(self.ping_server, f"{server_ip}"))
+        if AppSettings.server_ping is True:
+            self.thread_manager.start(partial(self.ping_server, f"{server_ip}"))
         response = requests.get(url=f"https://ipinfo.io/{server_ip}/json")
         data = response.json()
         country = data.get("country")

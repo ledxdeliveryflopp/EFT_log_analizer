@@ -3,6 +3,7 @@ from src.settings.constants import Translation
 
 class AppSettings:
     translations: bool = False
+    server_ping: bool = False
 
     def get_ui_translation(self) -> dict:
         """Возврат словаря с переводом ui"""
