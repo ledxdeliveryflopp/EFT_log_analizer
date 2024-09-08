@@ -15,3 +15,4 @@ class ThreadManager:
     def get_max_thread_count(self) -> int:
         """Возврат колличества доступных потоков в ЦП"""
         return self.thread_manager.maxThreadCount()
+
