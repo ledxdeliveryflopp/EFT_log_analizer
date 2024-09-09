@@ -115,8 +115,10 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
         translated_country_name = translate_country(eng_country=country)
         self.layout.addWidget(self.result_text)
         self.result_text.show()
-        self.result_text.setText(f"{self.lang.get('city')} {city}, {self.lang.get('country')} {translated_country_name},"
-                                 f" {self.lang.get('server_ip')} {server_ip}")
+        self.lang = get_translated_func()
+        self.result_text.setText(
+            f"{self.lang.get('city')} {city}, {self.lang.get('country')} {translated_country_name},"
+            f" {self.lang.get('server_ip')} {server_ip}")
 
     @logger.catch
     def get_last_log(self) -> None:
