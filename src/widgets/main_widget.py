@@ -1,7 +1,7 @@
+from loguru import logger
 from PySide6 import QtWidgets
 from PySide6.QtCore import QTimer
 from PySide6.QtGui import QAction
-from loguru import logger
 
 from src.settings.thread_manager import ThreadManager
 from src.widgets.server_analyze_widget import ServerAnalyzeWidget

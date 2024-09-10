@@ -1,7 +1,7 @@
+from loguru import logger
 from PySide6 import QtWidgets
 from PySide6.QtGui import QAction
 from PySide6.QtWidgets import QMenu
-from loguru import logger
 
 from src.settings.settings import AppSettings, get_translated_dict
 from src.settings.thread_manager import ThreadManager
@@ -97,10 +97,8 @@ class SettingsWidget(QtWidgets.QWidget, ThreadManager):
         if active_thread == 0:
             if self.ping_button.isChecked() is True:
                 AppSettings.server_ping = True
-                print(AppSettings.server_ping)
             elif self.ping_button.isChecked() is False:
                 AppSettings.server_ping = False
-                print(AppSettings.server_ping)
         else:
             self.ping_button.setChecked(self.ping_button_status)
             self.ping_button_status = None

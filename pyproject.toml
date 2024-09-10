@@ -13,8 +13,24 @@ pyside6 = "^6.7.2"
 pyinstaller = "^6.10.0"
 requests = "^2.32.3"
 loguru = "^0.7.2"
+ruff = "^0.6.4"
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff.lint]
+# See definitions https://docs.astral.sh/ruff/rules/
+select = [
+    "ASYNC", # flake8-async
+    "B",     # flake8-bugbear
+    "C4",    # flake8-comprehensions
+    "E",     # pycodestyle errors
+    "F",     # Pyflakes
+    "I",     # isort
+    "N",     # pep8-naming
+    "SIM",   # flake8-simplify
+    "T20",   # flake8-print
+    "TD",    # flake8-todos
+]

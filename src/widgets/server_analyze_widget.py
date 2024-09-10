@@ -1,13 +1,17 @@
 import subprocess
 from functools import partial
 
-from PySide6 import QtWidgets, QtCore
-from PySide6.QtWidgets import QFileDialog
 from loguru import logger
+from PySide6 import QtCore, QtWidgets
+from PySide6.QtWidgets import QFileDialog
 
-from src.settings.settings import get_translated_func, AppSettings
+from src.settings.settings import AppSettings, get_translated_func
 from src.settings.thread_manager import ThreadManager
-from src.settings.utils import translate_country, get_server_ip_from_log, get_info_about_ip
+from src.settings.utils import (
+    get_info_about_ip,
+    get_server_ip_from_log,
+    translate_country,
+)
 
 
 class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
