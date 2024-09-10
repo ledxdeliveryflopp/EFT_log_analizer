@@ -48,4 +48,6 @@ class MainWindow(QtWidgets.QMainWindow, ThreadManager):
     @logger.catch
     def open_settings_widget(self) -> None:
         """Открытие виджета настроек"""
+        self.settings_widget.store_main_widget(widget=self)
         self.settings_widget.show()
+

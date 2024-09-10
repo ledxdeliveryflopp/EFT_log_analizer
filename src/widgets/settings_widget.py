@@ -14,6 +14,7 @@ class SettingsWidget(QtWidgets.QWidget, ThreadManager):
         self.settings_menu: QMenu = settings_menu
         self.settings_menu_button: QAction = settings_menu_button
         self.analyze_widget = analyze_widget
+        self.main_widget = None
         self.layout = QtWidgets.QVBoxLayout(self)
         self.setWindowTitle("Settings")
 
@@ -102,3 +103,21 @@ class SettingsWidget(QtWidgets.QWidget, ThreadManager):
         else:
             self.ping_button.setChecked(self.ping_button_status)
             self.ping_button_status = None
+
+    def store_main_widget(self, widget):
+        """Сохранить класс главного окна"""
+        self.main_widget = widget
+
+    def block_main_widget(self):
+        """Заблокировать главное окно"""
+        self.main_widget.setEnabled(False)
+
+    def unblock_main_widget(self):
+        """Разблокировать главное окно"""
+        self.main_widget.setEnabled(True)
+
+    def showEvent(self, event):
+        self.block_main_widget()
+
+    def closeEvent(self, event):
+        self.unblock_main_widget()
