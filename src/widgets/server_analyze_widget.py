@@ -1,6 +1,5 @@
 import subprocess
 from functools import partial
-import requests
 
 from PySide6 import QtWidgets, QtCore
 from PySide6.QtWidgets import QFileDialog
@@ -8,7 +7,7 @@ from loguru import logger
 
 from src.settings.settings import get_translated_func, AppSettings
 from src.settings.thread_manager import ThreadManager
-from src.settings.utils import translate_country
+from src.settings.utils import translate_country, get_server_ip_from_log, get_info_about_ip
 
 
 class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
@@ -48,30 +47,24 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
             return False
 
     @logger.catch
-    def get_server_from_log_file(self) -> None | str | bool:
+    def get_server_from_log_file(self, saved_log=None) -> None | str | bool:
         """Поиск ip сервера в log файле"""
-        active = self.check_active_thread_block_button()
-        if active is False:
-            log_file = QFileDialog.getOpenFileName(self, self.lang.get("search_file"), filter="log(*.log)")[0]
-            if not log_file:
-                return None
-            with open(file=log_file, mode="r") as file:
-                content = file.read()
-            content_split = content.split("\n")
-            result_list = [string for string in content_split if
-                           "Enter to the 'Connected' state" in string]
-            result_list_len = len(result_list) - 1
-            last_connection_log = result_list[result_list_len]
-            self.last_log = log_file
-            server_address = last_connection_log.split(" ")
-            server_address = server_address[8:]
-            server_address = server_address[0]
-            server_address = server_address.split(",")
-            server_address = server_address[0]
-            server_address = server_address.split(":")
-            server_address = server_address[0]
-            logger.info(f"server ip - {server_address}")
-            return server_address
+        active_thread = self.check_active_thread_block_button()
+        if active_thread is False:
+            if not saved_log:
+                log_file = QFileDialog.getOpenFileName(self, self.lang.get("search_file"), filter="log(*.log)")[0]
+                if not log_file:
+                    return None
+                with open(file=log_file, mode="r") as file:
+                    content = file.read()
+                server_address = get_server_ip_from_log(log_file=content)
+                self.last_log = log_file
+                return server_address
+            else:
+                with open(file=saved_log, mode="r") as file:
+                    content = file.read()
+                server_address = get_server_ip_from_log(log_file=content)
+                return server_address
         else:
             return True
 
@@ -94,78 +87,63 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
     @logger.catch
     def get_server_info(self) -> None:
         """Получение информации о сервере"""
-        self.destroy_ping_result()
+        self.hide_ping_result()
+        lang = get_translated_func()
         server_ip = self.get_server_from_log_file()
         if not server_ip and self.help_text_status is False:
-            self.help_text.setText(self.lang.get("file_dont_selected"))
-            self.destroy_ping_result()
-            self.destroy_result_text()
+            self.help_text.setText(lang.get("file_dont_selected"))
+            self.hide_ping_result()
+            self.hide_result_text()
             return None
         elif server_ip is True:
             self.search_log_button.blockSignals(False)
             return None
         if self.help_text_status is False:
-            self.destroy_help_text()
+            self.hide_help_text()
         if AppSettings.server_ping is True:
             self.thread_manager.start(partial(self.ping_server, f"{server_ip}"))
-        response = requests.get(url=f"https://ipinfo.io/{server_ip}/json")
-        data = response.json()
+        data = get_info_about_ip(server_ip=server_ip)
         country = data.get("country")
         city = data.get("city")
         translated_country_name = translate_country(eng_country=country)
         self.layout.addWidget(self.result_text)
         self.result_text.show()
-        self.result_text.setText(f"{self.lang.get('city')} {city}, {self.lang.get('country')} {translated_country_name},"
-                                 f" {self.lang.get('server_ip')} {server_ip}")
+        self.result_text.setText(
+            f"{lang.get('city')} {city}, {lang.get('country')} {translated_country_name},"
+            f" {lang.get('server_ip')} {server_ip}")
 
     @logger.catch
     def get_last_log(self) -> None:
-        self.destroy_ping_result()
-        self.destroy_result_text()
         """Получение информации с последнего лога"""
-        with open(file=self.last_log, mode="r") as file:
-            content = file.read()
-        content_split = content.split("\n")
-        result_list = [string for string in content_split if
-                       "Enter to the 'Connected' state" in string]
-        result_list_len = len(result_list) - 1
-        last_connection_log = result_list[result_list_len]
-        server_address = last_connection_log.split(" ")
-        server_address = server_address[8:]
-        server_address = server_address[0]
-        server_address = server_address.split(",")
-        server_address = server_address[0]
-        server_address = server_address.split(":")
-        server_address = server_address[0]
-        logger.info(f"Slice result - {server_address}")
-        self.thread_manager.start(partial(self.ping_server, f"{server_address}"))
-        response = requests.get(url=f"https://ipinfo.io/{server_address}/json")
-        data = response.json()
+        self.hide_ping_result()
+        self.hide_result_text()
+        lang = get_translated_func()
+        server_ip = self.get_server_from_log_file(saved_log=self.last_log)
+        if AppSettings.server_ping is True:
+            self.thread_manager.start(partial(self.ping_server, f"{server_ip}"))
+        data = get_info_about_ip(server_ip=server_ip)
         country = data.get("country")
         city = data.get("city")
-        if self.help_text_status is False:
-            self.destroy_help_text()
         translated_country_name = translate_country(eng_country=country)
-        if self.result_text_status is True:
-            self.result_text.show()
         self.layout.addWidget(self.result_text)
+        self.result_text.show()
         self.result_text.setText(
-            f"{self.lang.get('city')} {city}, {self.lang.get('country')} {translated_country_name},"
-            f" {self.lang.get('server_ip')} {server_address}")
+            f"{lang.get('city')} {city}, {lang.get('country')} {translated_country_name},"
+            f" {lang.get('server_ip')} {server_ip}")
 
     @logger.catch
-    def destroy_help_text(self) -> None:
+    def hide_help_text(self) -> None:
         """Удаление информационного текста"""
         self.help_text.hide()
         self.help_text_status = True
 
     @logger.catch
-    def destroy_ping_result(self) -> None:
+    def hide_ping_result(self) -> None:
         """Удаление информационного текста"""
         self.ping_result.hide()
         self.ping_result_status = True
 
-    @logger.catch()
-    def destroy_result_text(self) -> None:
+    @logger.catch
+    def hide_result_text(self) -> None:
         self.result_text.hide()
         self.result_text_status = True
