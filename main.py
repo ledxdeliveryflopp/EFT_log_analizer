@@ -10,6 +10,7 @@ if __name__ == "__main__":
     window = MainWindow()
     app.setStyle('Windows')
     window.resize(700, 600)
-    logger.add("errors.log", rotation="100 MB", format="{time:DD-MM-YYYY at HH:mm:ss} | {level} | {message}")
+    logger.add("application.log", rotation="100 MB",
+               format="{time:DD-MM-YYYY at HH:mm:ss} | {level} | {message}")
     window.show()
     sys.exit(app.exec())

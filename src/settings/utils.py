@@ -42,4 +42,5 @@ def get_server_ip_from_log(log_file: str) -> str:
 def get_info_about_ip(server_ip: str) -> dict:
     response = requests.get(url=f"https://ipinfo.io/{server_ip}/json")
     data = response.json()
+    logger.info(f"request data - {data}")
     return data
