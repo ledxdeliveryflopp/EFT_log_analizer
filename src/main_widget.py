@@ -4,8 +4,8 @@ from PySide6.QtCore import QTimer
 from PySide6.QtGui import QAction
 
 from src.settings.thread_manager import ThreadManager
-from src.widgets.server_analyze_widget import ServerAnalyzeWidget
-from src.widgets.settings_widget import SettingsWidget
+from src.server_analyze.widget import ServerAnalyzeWidget
+from src.settings.widget import SettingsWidget
 
 
 class MainWindow(QtWidgets.QMainWindow, ThreadManager):
