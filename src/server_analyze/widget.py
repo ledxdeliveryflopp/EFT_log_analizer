@@ -15,6 +15,7 @@ from src.settings.utils import (
 
 
 class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
+    """Виджет анализа сервера"""
 
     def __init__(self) -> None:
         super().__init__()

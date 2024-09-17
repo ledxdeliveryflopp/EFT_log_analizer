@@ -9,10 +9,12 @@ from src.settings.thread_manager import ThreadManager
 
 class SettingsWidget(QtWidgets.QWidget, ThreadManager):
 
-    def __init__(self, settings_menu: QMenu, analyze_widget, settings_menu_button: QAction) -> None:
+    def __init__(self, settings_menu: QMenu, analyze_widget, settings_menu_button: QAction,
+                 version_menu_button: QAction) -> None:
         super().__init__()
         self.settings_menu: QMenu = settings_menu
         self.settings_menu_button: QAction = settings_menu_button
+        self.version_menu_button: QAction = version_menu_button
         self.analyze_widget = analyze_widget
         self.main_widget = None
         self.layout = QtWidgets.QVBoxLayout(self)
@@ -62,6 +64,7 @@ class SettingsWidget(QtWidgets.QWidget, ThreadManager):
                             f" settings: {AppSettings.translations}")
                 self.settings_menu.setTitle(new_lang.get("app_toolbar"))
                 self.settings_menu_button.setText(new_lang.get("settings"))
+                self.version_menu_button.setText(new_lang.get("version_checker"))
                 self.translation_button.setText(new_lang.get("translation"))
                 self.ping_button.setText(new_lang.get("server_ping"))
                 self.analyze_widget.search_log_button.setText(new_lang.get("search_log_file"))
@@ -77,6 +80,7 @@ class SettingsWidget(QtWidgets.QWidget, ThreadManager):
                             f" settings: {AppSettings.translations}")
                 self.settings_menu.setTitle(new_lang.get("app_toolbar"))
                 self.settings_menu_button.setText(new_lang.get("settings"))
+                self.version_menu_button.setText(new_lang.get("version_checker"))
                 self.translation_button.setText(new_lang.get("translation"))
                 self.ping_button.setText(new_lang.get("server_ping"))
                 self.analyze_widget.search_log_button.setText(new_lang.get("search_log_file"))

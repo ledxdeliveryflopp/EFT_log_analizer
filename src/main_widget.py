@@ -4,12 +4,14 @@ from PySide6.QtCore import QTimer
 from PySide6.QtGui import QAction
 
 from src.settings.thread_manager import ThreadManager
-from src.widgets.server_analyze_widget import ServerAnalyzeWidget
-from src.widgets.settings_widget import SettingsWidget
+from src.server_analyze.widget import ServerAnalyzeWidget
+from src.settings.widget import SettingsWidget
+from src.version.widget import VersionCheckerWidget
 
 
 class MainWindow(QtWidgets.QMainWindow, ThreadManager):
 
+    @logger.catch
     def __init__(self) -> None:
         super().__init__()
         self.timer = QTimer()
@@ -19,16 +21,22 @@ class MainWindow(QtWidgets.QMainWindow, ThreadManager):
 
         self.settings_menu_button = QAction("Settings", self)
         self.settings_menu_button.triggered.connect(self.open_settings_widget)
+        self.version_menu_button = QAction("Version checker", self)
+        self.version_menu_button.triggered.connect(self.open_app_version_widget)
 
         self.menu = self.menuBar()
         self.settings_menu = self.menu.addMenu("App")
         self.settings_menu.addAction(self.settings_menu_button)
         self.settings_menu.addSeparator()
+        self.settings_menu.addAction(self.version_menu_button)
 
+        self.version_widget = VersionCheckerWidget(main_widget=self)
         self.analyze_widget = ServerAnalyzeWidget()
         self.settings_widget = SettingsWidget(settings_menu=self.settings_menu,
                                               settings_menu_button=self.settings_menu_button,
+                                              version_menu_button=self.version_menu_button,
                                               analyze_widget=self.analyze_widget)
+
         self.settings_widget.set_translation()
         self.setCentralWidget(self.analyze_widget)
 
@@ -51,3 +59,6 @@ class MainWindow(QtWidgets.QMainWindow, ThreadManager):
         self.settings_widget.store_main_widget(widget=self)
         self.settings_widget.show()
 
+    @logger.catch
+    def open_app_version_widget(self) -> None:
+        self.version_widget.show()

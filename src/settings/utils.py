@@ -40,7 +40,25 @@ def get_server_ip_from_log(log_file: str) -> str:
 
 @logger.catch
 def get_info_about_ip(server_ip: str) -> dict:
+    """Информация об Ip адресе"""
     response = requests.get(url=f"https://ipinfo.io/{server_ip}/json")
     data = response.json()
     logger.info(f"request data - {data}")
     return data
+
+
+@logger.catch
+def check_app_version() -> dict | bool:
+    """Проверка версии приложения"""
+    response = requests.get(
+        url="https://api.github.com/repos/ledxdeliveryflopp/eft_server_analyzer"
+            "/releases/latest")
+    data = response.json()
+    version_github = data["tag_name"]
+    app_version = AppSettings.app_version
+    logger.info(f"git V - {version_github}, app V - {app_version}")
+    if app_version != version_github:
+        github_page = data["html_url"]
+        return {"git_version": version_github, "app_version": app_version, "git": github_page}
+    else:
+        return True
