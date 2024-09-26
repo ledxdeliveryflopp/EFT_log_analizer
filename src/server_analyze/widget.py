@@ -5,7 +5,7 @@ from loguru import logger
 from PySide6 import QtCore, QtWidgets
 from PySide6.QtWidgets import QFileDialog
 
-from src.settings.settings import AppSettings, get_translated_func
+from src.settings.settings import AppSettings
 from src.settings.thread_manager import ThreadManager
 from src.settings.utils import (
     get_info_about_ip,
@@ -19,7 +19,6 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
 
     def __init__(self) -> None:
         super().__init__()
-        self.lang = get_translated_func()
 
         self.help_text_status = False
         self.ping_result_status = False
@@ -27,12 +26,12 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
         self.result_text_status = None
 
         self.layout = QtWidgets.QVBoxLayout(self)
-
         self.result_text = QtWidgets.QLabel(alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
         self.ping_result = QtWidgets.QLabel(alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.help_text = QtWidgets.QLabel(alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
-        self.search_log_button = QtWidgets.QPushButton()
-        self.last_log_button = QtWidgets.QPushButton()
+        self.help_text = QtWidgets.QLabel(self.tr("log name - network-connection"),
+                                          alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.search_log_button = QtWidgets.QPushButton(self.tr("Search log"))
+        self.last_log_button = QtWidgets.QPushButton(self.tr("Server from last log"))
 
         self.last_log_button.clicked.connect(self.get_last_log)
         self.search_log_button.clicked.connect(self.get_server_info)
@@ -40,6 +39,11 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
         self.layout.addWidget(self.search_log_button, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.help_text, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.last_log_button, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+
+        # with open("src/static/qss/style.qss", "r") as file:
+        #     _style = file.read()
+        #     print(_style)
+        # self.ping_result.setStyleSheet(_style)
 
     @logger.catch
     def check_active_thread_block_button(self) -> bool:
@@ -57,7 +61,7 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
         active_thread = self.check_active_thread_block_button()
         if active_thread is False:
             if not saved_log:
-                log_file = QFileDialog.getOpenFileName(self, self.lang.get("search_file"), filter="log(*.log)")[0]
+                log_file = QFileDialog.getOpenFileName(self, self.tr("search file"), filter="log(*.log)")[0]
                 if not log_file:
                     return None
                 with open(file=log_file, mode="r") as file:
@@ -85,7 +89,7 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
         command_result = command_result_slice[0]
         logger.info(f"ping result - {command_result}")
         self.layout.addWidget(self.ping_result)
-        self.ping_result.setText(f"{self.lang.get('ping_result')}{command_result}")
+        self.ping_result.setText(f"{self.tr('ping result')}{command_result}")
         logger.info(f"{self.ping_server.__name__} - thread stop")
         self.ping_result.show()
 
@@ -93,10 +97,9 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
     def get_server_info(self) -> None:
         """Получение информации о сервере"""
         self.hide_ping_result()
-        lang = get_translated_func()
         server_ip = self.get_server_from_log_file()
         if not server_ip and self.help_text_status is False:
-            self.help_text.setText(lang.get("file_dont_selected"))
+            self.help_text.setText(self.tr("file dont selected"))
             self.hide_ping_result()
             self.hide_result_text()
             return None
@@ -114,15 +117,14 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
         self.layout.addWidget(self.result_text)
         self.result_text.show()
         self.result_text.setText(
-            f"{lang.get('city')} {city}, {lang.get('country')} {translated_country_name},"
-            f" {lang.get('server_ip')} {server_ip}")
+            f"{self.tr('city')} - {city}, {self.tr('country')} - {translated_country_name},"
+            f" {self.tr('server_ip')} - {server_ip}")
 
     @logger.catch
     def get_last_log(self) -> None:
         """Получение информации с последнего лога"""
         self.hide_ping_result()
         self.hide_result_text()
-        lang = get_translated_func()
         server_ip = self.get_server_from_log_file(saved_log=self.last_log)
         if AppSettings.server_ping is True:
             self.thread_manager.start(partial(self.ping_server, f"{server_ip}"))
@@ -133,8 +135,8 @@ class ServerAnalyzeWidget(QtWidgets.QWidget, ThreadManager):
         self.layout.addWidget(self.result_text)
         self.result_text.show()
         self.result_text.setText(
-            f"{lang.get('city')} {city}, {lang.get('country')} {translated_country_name},"
-            f" {lang.get('server_ip')} {server_ip}")
+            f"{self.tr('city')} {city}, {self.tr('country')} {translated_country_name},"
+            f" {self.tr('server_ip')} {server_ip}")
 
     @logger.catch
     def hide_help_text(self) -> None:

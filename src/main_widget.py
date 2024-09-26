@@ -18,14 +18,13 @@ class MainWindow(QtWidgets.QMainWindow, ThreadManager):
         self.translation_button_status = None
         self.ping_button_status = None
         self.setWindowTitle("Eft-server-analyzer")
-
-        self.settings_menu_button = QAction("Settings", self)
+        self.settings_menu_button = QAction(self.tr("Settings"), self)
         self.settings_menu_button.triggered.connect(self.open_settings_widget)
-        self.version_menu_button = QAction("Version checker", self)
+        self.version_menu_button = QAction(self.tr("Version checker"), self)
         self.version_menu_button.triggered.connect(self.open_app_version_widget)
 
         self.menu = self.menuBar()
-        self.settings_menu = self.menu.addMenu("App")
+        self.settings_menu = self.menu.addMenu(self.tr("App"))
         self.settings_menu.addAction(self.settings_menu_button)
         self.settings_menu.addSeparator()
         self.settings_menu.addAction(self.version_menu_button)
@@ -37,11 +36,11 @@ class MainWindow(QtWidgets.QMainWindow, ThreadManager):
                                               version_menu_button=self.version_menu_button,
                                               analyze_widget=self.analyze_widget)
 
-        self.settings_widget.set_translation()
+        # self.settings_widget.set_translation()
         self.setCentralWidget(self.analyze_widget)
 
     @logger.catch
-    def block_settings_menu(self):
+    def block_settings_menu(self)  -> None:
         """Блокировка настроек при активных потоках(кроме этого)"""
         logger.info(f"{self.block_settings_menu.__name__} - thread start")
         active_thread = self.get_active_thread_count()

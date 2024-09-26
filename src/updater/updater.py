@@ -11,7 +11,8 @@ logger.add("updater.log", rotation="100 MB",
 
 
 @logger.catch
-def download_update():
+def download_update() -> None:
+    """Скачивание архива"""
     response = requests.get(
         url="https://api.github.com/repos/ledxdeliveryflopp/eft_server_analyzer"
             "/releases/latest")
@@ -22,7 +23,8 @@ def download_update():
 
 
 @logger.catch
-def unzip_update():
+def unzip_update() -> None:
+    """распаковка архива в временную папку"""
     os.mkdir("temp-update")
     with py7zr.SevenZipFile("update.7z", mode='r') as update_zip:
         update_zip.extractall(path="temp-update")
@@ -32,7 +34,8 @@ def unzip_update():
 
 
 @logger.catch
-def update_files():
+def update_files() -> None:
+    """Обновление файлов"""
     compare = filecmp.cmp('temp-update/eft-server-analyzer.exe', "eft-server-analyzer.exe")
     if compare is False:
         logger.info("file compared, files are different")
@@ -42,7 +45,8 @@ def update_files():
 
 
 @logger.catch
-def start_update():
+def start_update() -> None:
+    """Запуск обновления"""
     download_update()
     logger.info(f"{download_update.__name__} - finished")
     unzip_update()
