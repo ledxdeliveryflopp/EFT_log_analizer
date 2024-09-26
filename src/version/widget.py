@@ -1,11 +1,15 @@
+import sys
+
+from subprocess import Popen
 from PySide6 import QtWidgets, QtCore
 from loguru import logger
 
 from src.settings.settings import get_translated_func
+from src.settings.thread_manager import ThreadManager
 from src.settings.utils import check_app_version
 
 
-class VersionCheckerWidget(QtWidgets.QWidget):
+class VersionCheckerWidget(QtWidgets.QWidget, ThreadManager):
     """Виджет проверки версии"""
 
     def __init__(self, main_widget):
@@ -14,12 +18,25 @@ class VersionCheckerWidget(QtWidgets.QWidget):
         self.layout = QtWidgets.QVBoxLayout(self)
         self.main_widget = main_widget
 
+        self.update_button = QtWidgets.QPushButton(self.tr("update"), self)
+        self.update_button.clicked.connect(self.start_update)
+
         self.message = QtWidgets.QLabel(alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
         self.actual_version = QtWidgets.QLabel(alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
         self.app_version = QtWidgets.QLabel(alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
         self.github_page = QtWidgets.QLabel(alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
 
         self.layout.addWidget(self.message)
+        self.layout.addWidget(self.update_button)
+
+    @logger.catch
+    def spawn_program_and_die(self, program, exit_code=0):
+        Popen(program)
+        sys.exit(exit_code)
+
+    @logger.catch
+    def start_update(self):
+        self.spawn_program_and_die(["updater.exe"])
 
     def store_main_widget(self, widget):
         """Сохранить класс виджета настроек"""
