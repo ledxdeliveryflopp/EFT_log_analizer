@@ -162,3 +162,7 @@ cython_debug/
 # PYinstaller
 build
 dist
+
+# Nuitka
+main.build
+main.dist
