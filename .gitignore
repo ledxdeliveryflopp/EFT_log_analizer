@@ -166,3 +166,6 @@ dist
 # Nuitka
 main.build
 main.dist
+
+# app config
+settings
